@@ -1,0 +1,6 @@
+[package]
+name = "RSIS_Rust"
+version = "0.1.0"
+authors = ["elsuizo <martin.noblia@openmailbox.org>"]
+
+[dependencies]
