@@ -4,3 +4,4 @@ version = "0.1.0"
 authors = ["elsuizo <martin.noblia@openmailbox.org>"]
 
 [dependencies]
+sfml = "0.11.0"
