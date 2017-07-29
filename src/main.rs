@@ -47,7 +47,7 @@ fn main() {
     window.set_vertical_sync_enabled(true);
 
     let font = Font::new_from_file("src/res/sansation.ttf").unwrap();
-
+    let mut counter = 0;
     let rosette_color = Color::new_rgb(0, 102, 255);
     let rosette = Rosette::new(rosette_color, 3.0);
     let bg_color = &Color::new_rgb(0, 0, 0);
@@ -67,10 +67,11 @@ fn main() {
                 }
                 _ => {}
             }
-
-            msg.set_string("Piola");
-            // window.draw(&msg);
+            msg.set_string(&format!("counter: {}", counter));
+            counter += 1;
             window.clear(bg_color);
+
+            window.draw(&msg);
             window.display();
         }
     }
