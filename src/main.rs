@@ -5,16 +5,30 @@ extern crate sfml;
 use sfml::graphics::{CircleShape, Color, RenderTarget, RenderWindow, Shape, Font, Transformable,
                      RectangleShape, Text};
 use sfml::window::{Key, VideoMode, window_style, event, MouseButton};
-use sfml::system::Vector2f;
+use sfml::system::{Clock, Time, Vector2f};
 use std::f32::consts::PI;
 use std::collections::VecDeque;
 
-struct Rosette {
+struct Rosette<'a> {
     color: Color,
     radius: f32,
-    pos: Vector2f,
-    vel: Vector2f,
-    acc: Vector2f,
+    shape: CircleShape<'a>,
+    position: Vector2f,
+    velocity: Vector2f,
+    aceleration: Vector2f,
+}
+
+impl<'a> Rosette<'a> {
+    fn new(color: Color, radius: f32) -> Self {
+        Rosette {
+            color: color,
+            radius: radius,
+            shape: CircleShape::new().unwrap(),
+            position: Vector2f::new(0.0, 0.0),
+            velocity: Vector2f::new(0.0, 0.0),
+            aceleration: Vector2f::new(0.0, 0.0),
+        }
+    }
 }
 
 fn main() {
@@ -22,23 +36,25 @@ fn main() {
     let side: u32 = 700;
     let width: u32 = side;
     let height: u32 = side;
-    let rosette_radius: f32 = 11.;
-
     // Create the window of the application
+    let rosette_color = Color::new_rgb(0, 0, 0);
+    let fg_color = &Color::new_rgb(255, 255, 255);
+    let r = Rosette::new(rosette_color, 37.0);
     let mut window = RenderWindow::new(VideoMode::new_init(width, height, 32),
-                                       "SFML Pong",
+                                       "Rosette",
                                        window_style::CLOSE,
-                                       &Default::default())
-                                        .unwrap();
+                                       &Default::default()).unwrap();
     window.set_vertical_sync_enabled(true);
 
     let font = Font::new_from_file("src/res/sansation.ttf").unwrap();
 
-    let rosette_color = &Color::new_rgb(0, 102, 255);
+    let rosette_color = Color::new_rgb(0, 102, 255);
+    let rosette = Rosette::new(rosette_color, 3.0);
     let bg_color = &Color::new_rgb(0, 0, 0);
-    let mut rosette = create_circle(rosette_radius, rosette_color);
-    rosette.set_position(&Vector2f::new(width as f32 / 2., height as f32 / 2.));
-
+    let mut clock = Clock::new();
+    let mut msg = Text::new_init("asdfasdf", &font, 20).unwrap();
+    msg.set_position(&(Vector2f::new(0., 0.)));
+    msg.set_color(fg_color);
     loop {
         for event in window.events() {
             match event {
@@ -52,51 +68,11 @@ fn main() {
                 _ => {}
             }
 
+            msg.set_string("Piola");
+            // window.draw(&msg);
             window.clear(bg_color);
-            window.draw(&rosette);
             window.display();
         }
- }
+    }
 }
 
-fn create_circle(radius: f32, fill: &Color) -> CircleShape {
-    let mut obj = CircleShape::new().unwrap();
-    obj.set_radius(radius as f32);
-    obj.set_outline_thickness(0.);
-    obj.set_outline_color(&Color::black());
-    obj.set_fill_color(fill);
-    obj.set_origin(&Vector2f::new(radius / 2., radius / 2.));
-
-    return obj;
-}
-
-fn scale(v: &Vector2f, c: f32) -> Vector2f {
-    return Vector2f::new(c * v.x, c * v.y);
-}
-
-fn dist(v1: &Vector2f, v2: &Vector2f) -> f32 {
-    return ((v1.x - v2.x).powi(2) + (v1.y - v2.y).powi(2)).sqrt();
-}
-
-fn len(v: &Vector2f) -> f32 {
-    return (v.x * v.x + v.y * v.y).sqrt();
-}
-
-fn sqdist(v1: &Vector2f, v2: &Vector2f) -> f32 {
-    return ((v1.x - v2.x).powi(2) + (v1.y - v2.y).powi(2));
-}
-
-fn add(a: &Vector2f, b: &Vector2f) -> Vector2f {
-    return Vector2f::new(a.x + b.x, a.y + b.y);
-}
-
-fn sub(a: &Vector2f, b: &Vector2f) -> Vector2f {
-    return Vector2f::new(a.x - b.x, a.y - b.y);
-}
-
-fn accel(r: &Vector2f, s: &Vector2f, ms: f32) -> Vector2f {
-    let G = 6.672E-11;
-    let epsilon = 1.;
-    let v = -G * ms / (epsilon * epsilon + sqdist(r, s)).powf(1.5);
-    return scale(&sub(r, s), v);
-}
